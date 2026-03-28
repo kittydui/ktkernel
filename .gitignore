@@ -1,0 +1,6 @@
+root/
+build/
+ktOS.iso
+compile_commands.json
+.cache/
+

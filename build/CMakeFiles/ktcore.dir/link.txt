@@ -1,0 +1,2 @@
+/run/current-system/sw/bin/llvm-ar qc libktcore.a CMakeFiles/ktcore.dir/ktcore/cpu/gdt.cpp.obj
+/run/current-system/sw/bin/llvm-ranlib libktcore.a

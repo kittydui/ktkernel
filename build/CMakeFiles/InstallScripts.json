@@ -1,0 +1,7 @@
+{
+	"InstallScripts" : 
+	[
+		"/home/dui/work/custom_kernel/build/cmake_install.cmake"
+	],
+	"Parallel" : false
+}
