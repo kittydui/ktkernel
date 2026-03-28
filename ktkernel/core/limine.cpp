@@ -24,6 +24,11 @@ __attribute__((used, section(".limine_requests"))) volatile limine_hhdm_request 
     .revision = 0,
 };
 
+__attribute__((used, section(".limine_requests"))) volatile limine_module_request g_moduleRequest = {
+    .id = LIMINE_MODULE_REQUEST_ID,
+    .revision = 0,
+};
+
 __attribute__((used, section(".limine_requests_start"))) volatile uint64_t g_limineRequestsStartMarker[] =
     LIMINE_REQUESTS_START_MARKER;
 
