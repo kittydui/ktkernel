@@ -13,7 +13,7 @@ extern "C" [[noreturn]] void KtMain()
     limine_framebuffer* framebuffer = g_framebufferRequest.response->framebuffers[0];
     limine_file* font_file = g_moduleRequest.response->modules[0];
 
-    static KtCore::FramebufferConsole fb_console(framebuffer, (uint8_t*)font_file->address);
+    static KtCore::FramebufferConsole fb_console(framebuffer, font_file->address);
     KtCore::g_KConsole = &fb_console;
 
     ClearConsole();
