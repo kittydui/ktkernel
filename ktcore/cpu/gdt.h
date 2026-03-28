@@ -1,5 +1,5 @@
 #pragma once
 
 namespace KtCore {
-  bool setupGdt(void* gdtPointer);
-}
+auto SetupGdt(void* gdtPointer) -> bool;
+} // namespace KtCore

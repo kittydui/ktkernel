@@ -1,0 +1,33 @@
+---
+Checks: 'bugprone-*,performance-*,readability-*,modernize-*,clang-analyzer-*,readability-identifier-naming,-readability-identifier-length'
+CheckOptions:
+  # Global Functions: PascalCase
+  - key: readability-identifier-naming.FunctionCase
+    value: PascalCase
+  
+  # Classes and Structs: PascalCase
+  - key: readability-identifier-naming.ClassCase
+    value: PascalCase
+  - key: readability-identifier-naming.StructCase
+    value: PascalCase
+
+  # Global Variables: g_camelCase
+  - key: readability-identifier-naming.GlobalVariableCase
+    value: camelCase
+  - key: readability-identifier-naming.GlobalVariablePrefix
+    value: 'g_'
+
+  # Class Members: camelCase
+  - key: readability-identifier-naming.ClassMemberCase
+    value: camelCase
+  - key: readability-identifier-naming.StructMemberCase
+    value: camelCase
+
+  # Class Methods: camelCase
+  - key: readability-identifier-naming.ClassMethodCase
+    value: camelCase
+
+  # Ignore Case for pointers/references specifically if needed
+  - key: readability-identifier-naming.PointerParameterCase
+    value: camelCase
+...

@@ -1,0 +1,26 @@
+---
+Language: Cpp
+BasedOnStyle: LLVM
+
+IndentWidth: 4
+UseTab: Never
+ColumnLimit: 100
+
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterFunction: true
+  AfterControlStatement: MultiLine
+  BeforeElse: false
+  AfterClass: false
+  AfterNamespace: false
+  AfterExternBlock: true
+
+SpaceBeforeParens: ControlStatements
+
+BreakBeforeConceptDeclarations: true
+NamespaceIndentation: None
+IndentExternBlock: NoIndent
+
+PointerAlignment: Left
+
+...
