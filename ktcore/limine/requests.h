@@ -8,7 +8,9 @@ extern volatile uint64_t g_limineBaseRevision[];
 
 extern volatile limine_rsdp_request g_rsdpRequest;
 extern volatile limine_framebuffer_request g_framebufferRequest;
+extern volatile limine_memmap_request g_memmapRequest;
+extern volatile limine_hhdm_request g_hhdmRequest;
 
-extern volatile uint64_t g_limineRequestsBeginMarker[];
+extern volatile uint64_t g_limineRequestsStartMarker[];
 extern volatile uint64_t g_limineRequestsEndMarker[];
 }

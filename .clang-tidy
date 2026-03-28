@@ -1,5 +1,5 @@
 ---
-Checks: 'bugprone-*,performance-*,readability-*,modernize-*,clang-analyzer-*,readability-identifier-naming,-readability-identifier-length'
+Checks: 'bugprone-*,performance-*,readability-*,modernize-*,clang-analyzer-*,readability-identifier-naming,-readability-identifier-length,-modernize-avoid-c-arrays,-modernize-use-trailing-return-type'
 CheckOptions:
   # Global Functions: PascalCase
   - key: readability-identifier-naming.FunctionCase

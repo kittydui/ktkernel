@@ -1,6 +1,6 @@
 OUTPUT_FORMAT(elf64-x86-64)
 
-ENTRY(ktmain)
+ENTRY(KtMain)
 
 PHDRS {
   limine_requests PT_LOAD;
@@ -10,6 +10,8 @@ PHDRS {
 }
 
 SECTIONS {
+  . = 0xffffffff80000000;
+
   .limine_requests : {
     KEEP(*(.limine_requests_start))
     KEEP(*(.limine_requests))
