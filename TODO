@@ -1,2 +1,4 @@
 * Move KConsole init to another function where other initialization would happen for various early-boot subsystems.
 * Do the above for all limine requests.
+* Setup GDT.
+* Implement ACPICA (from Intel) and start to find hardware devices.

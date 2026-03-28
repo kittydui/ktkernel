@@ -21,8 +21,8 @@ extern "C" [[noreturn]] void KtMain()
     static KtCore::FramebufferConsole fb_console(framebuffer, _binary_fonts_Lat2_Terminus16_psfu_start);
     KtCore::g_KConsole = &fb_console;
 
-    KtCore::g_KConsole->clear();
-    KtCore::g_KConsole->print("mreow");
+    ClearConsole();
+    Print("Mreow :3");
 
     while (true)
         __asm__("hlt");

@@ -32,3 +32,6 @@ private:
 
 inline FramebufferConsole* g_KConsole;
 } // namespace KtCore
+  //
+#define Print(msg) KtCore::g_KConsole->print(msg)
+#define ClearConsole() KtCore::g_KConsole->clear()
