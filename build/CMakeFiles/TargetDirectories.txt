@@ -1,4 +1,0 @@
-/home/dui/work/custom_kernel/build/CMakeFiles/ktcore.dir
-/home/dui/work/custom_kernel/build/CMakeFiles/ktkernel.dir
-/home/dui/work/custom_kernel/build/CMakeFiles/edit_cache.dir
-/home/dui/work/custom_kernel/build/CMakeFiles/rebuild_cache.dir
