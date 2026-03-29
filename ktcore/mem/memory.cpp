@@ -5,7 +5,7 @@
 extern "C"
 {
 
-auto memcpy(void* dest, const void* src, size_t n) -> void*
+void* memcpy(void* dest, const void* src, size_t n)
 {
     auto* d = reinterpret_cast<uint8_t*>(dest);
     const auto* s = reinterpret_cast<const uint8_t*>(src);
@@ -15,7 +15,7 @@ auto memcpy(void* dest, const void* src, size_t n) -> void*
     return dest;
 }
 
-auto memset(void* s, int c, size_t n) -> void*
+void* memset(void* s, int c, size_t n)
 {
     auto* p = reinterpret_cast<uint8_t*>(s);
     while (n--)
@@ -24,7 +24,7 @@ auto memset(void* s, int c, size_t n) -> void*
     return s;
 }
 
-auto memmove(void* dest, const void* src, size_t n) -> void*
+void* memmove(void* dest, const void* src, size_t n)
 {
     auto* d = reinterpret_cast<uint8_t*>(dest);
     const auto* s = reinterpret_cast<const uint8_t*>(src);
@@ -42,7 +42,7 @@ auto memmove(void* dest, const void* src, size_t n) -> void*
     return dest;
 }
 
-auto memcmp(const void* s1, const void* s2, size_t n) -> int
+int memcmp(const void* s1, const void* s2, size_t n)
 {
     const auto* p1 = reinterpret_cast<const uint8_t*>(s1);
     const auto* p2 = reinterpret_cast<const uint8_t*>(s2);

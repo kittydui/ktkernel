@@ -1,6 +1,8 @@
 #pragma once
 #include <cstdint>
 
+// TODO: this can probably be moved somewhere else.
+
 namespace KtCore {
 struct PSF2Header {
     uint32_t magic;

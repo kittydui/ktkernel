@@ -1,12 +1,17 @@
-#include "console/console.h"
+#include "subsystems/console/console.h"
+#include "limine/requests.h"
 #include "mem/memory.h"
 
 namespace KtCore {
-FramebufferConsole::FramebufferConsole(limine_framebuffer* framebuffer, void* fontData)
+bool FramebufferConsole::initialize()
 {
-    this->m_framebuffer = framebuffer;
-    this->m_font = reinterpret_cast<PSF2Header*>(fontData);
+    // by this time we know that the framebuffer request was valid.
+    m_framebuffer = g_framebufferRequest.response->framebuffers[0];
+    m_font = reinterpret_cast<PSF2Header*>(g_moduleRequest.response->modules[0]->address);
+    return m_framebuffer != nullptr && m_font != nullptr;
 }
+
+void FramebufferConsole::shutdown() {}
 
 void FramebufferConsole::drawCharacter(int x, int y, char c, uint32_t foreground, uint32_t background)
 {
