@@ -1,6 +1,7 @@
 #pragma once
 
-namespace KtCore {
+namespace KtCore
+{
 [[noreturn]] inline void Halt()
 {
     while (true)

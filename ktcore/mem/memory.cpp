@@ -4,7 +4,6 @@
 
 extern "C"
 {
-
 void* memcpy(void* dest, const void* src, size_t n)
 {
     auto* d = reinterpret_cast<uint8_t*>(dest);

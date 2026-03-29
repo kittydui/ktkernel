@@ -1,6 +1,7 @@
 #pragma once
 
-namespace KtKernel {
+namespace KtKernel
+{
 bool CheckLimineFeatures();
 void InitializeSubsystems();
 } // namespace KtKernel

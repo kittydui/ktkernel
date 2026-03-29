@@ -3,14 +3,15 @@
 #include "limine/requests.h"
 #include "systems.h"
 
-namespace KtKernel {
+namespace KtKernel
+{
 void InitializeSubsystems()
 {
     if (!CheckLimineFeatures())
         KtCore::Halt();
 
     static KtCore::KernelContext ctx;
-    KtCore::g_KernelContext = &ctx;
+    KtCore::g_kernelContext = &ctx;
 
     static KtCore::FramebufferConsole console;
     ctx.m_console = &console;

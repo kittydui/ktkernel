@@ -1,8 +1,10 @@
 #pragma once
 #include <cstdint>
 
-namespace KtCore {
-struct RSDP {
+namespace KtCore
+{
+struct RSDP
+{
     char m_signature[8];
     uint8_t m_checksum;
     char m_oemid[6];

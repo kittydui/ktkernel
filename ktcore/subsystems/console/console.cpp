@@ -2,7 +2,8 @@
 #include "limine/requests.h"
 #include "mem/memory.h"
 
-namespace KtCore {
+namespace KtCore
+{
 bool FramebufferConsole::initialize()
 {
     // by this time we know that the framebuffer request was valid.
@@ -15,11 +16,11 @@ void FramebufferConsole::shutdown() {}
 
 void FramebufferConsole::drawCharacter(int x, int y, char c, uint32_t foreground, uint32_t background)
 {
-    uint8_t* glyph = reinterpret_cast<uint8_t*>(m_font) + m_font->headerSize + (c * m_font->charSize);
-    uint32_t bytes = (m_font->width + 7) / 8;
+    uint8_t* glyph = reinterpret_cast<uint8_t*>(m_font) + m_font->m_headerSize + (c * m_font->m_charSize);
+    uint32_t bytes = (m_font->m_width + 7) / 8;
 
-    for (uint32_t cy = 0; cy < m_font->height; cy++) {
-        for (uint32_t cx = 0; cx < m_font->width; cx++) {
+    for (uint32_t cy = 0; cy < m_font->m_height; cy++) {
+        for (uint32_t cx = 0; cx < m_font->m_width; cx++) {
             bool bit = glyph[cx / 8] & (0x80 >> (cx % 8));
             auto* pixel =
                 reinterpret_cast<uint32_t*>(reinterpret_cast<uintptr_t>(m_framebuffer->address) +
@@ -45,7 +46,7 @@ void FramebufferConsole::clear(uint32_t color)
 
 void FramebufferConsole::scroll()
 {
-    size_t charHeight = m_font->height * m_framebuffer->pitch;
+    size_t charHeight = m_font->m_height * m_framebuffer->pitch;
     size_t totalFramebuffer = m_framebuffer->height * m_framebuffer->pitch;
 
     memmove(m_framebuffer->address,
@@ -56,29 +57,29 @@ void FramebufferConsole::scroll()
            0,
            charHeight);
 
-    m_cursorY -= m_font->height;
+    m_cursorY -= m_font->m_height;
 }
 
 void FramebufferConsole::putChar(char c, uint32_t foreground, uint32_t background)
 {
     if (c == '\n') {
         m_cursorX = 0;
-        m_cursorY += m_font->height;
+        m_cursorY += m_font->m_height;
     } else if (c == '\r') {
         m_cursorX = 0;
     } else if (c == '\t') {
-        m_cursorX += (m_font->width * 4);
+        m_cursorX += (m_font->m_width * 4);
     } else {
         drawCharacter(m_cursorX, m_cursorY, c, foreground, background);
-        m_cursorX += m_font->width;
+        m_cursorX += m_font->m_width;
     }
 
-    if (m_cursorX + m_font->width > m_framebuffer->width) {
+    if (m_cursorX + m_font->m_width > m_framebuffer->width) {
         m_cursorX = 0;
-        m_cursorY += m_font->height;
+        m_cursorY += m_font->m_height;
     }
 
-    if (m_cursorY + m_font->height > m_framebuffer->height)
+    if (m_cursorY + m_font->m_height > m_framebuffer->height)
         scroll();
 }
 

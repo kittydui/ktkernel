@@ -2,27 +2,27 @@
 #include <cstddef>
 #include <cstdint>
 
-namespace KtCore {
-namespace Internal {
-
-struct FormatBuffer {
-    char* data;
-    size_t capacity;
-    size_t pos;
+namespace KtCore::Internal
+{
+struct FormatBuffer
+{
+    char* m_data;
+    size_t m_capacity;
+    size_t m_pos;
 
     void putChar(char c)
     {
-        if (pos < capacity - 1)
-            data[pos++] = c;
+        if (m_pos < m_capacity - 1)
+            m_data[m_pos++] = c;
     }
 
     void putString(const char* s)
     {
-        while (*s && pos < capacity - 1)
-            data[pos++] = *s++;
+        while (*s && m_pos < m_capacity - 1)
+            m_data[m_pos++] = *s++;
     }
 
-    void terminate() { data[pos] = '\0'; }
+    void terminate() { m_data[m_pos] = '\0'; }
 };
 
 inline void WriteDecimal(FormatBuffer& buf, uint64_t value)
@@ -135,6 +135,4 @@ template <typename T, typename... Rest> void FormatImpl(FormatBuffer& buf, const
         fmt++;
     }
 }
-
-} // namespace Internal
-} // namespace KtCore
+} // namespace KtCore::Internal

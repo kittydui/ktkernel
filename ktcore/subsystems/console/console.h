@@ -1,9 +1,11 @@
 #pragma once
 #include "limine/limine.h"
 #include "subsystems/console/format.h"
-#include "subsystems/console/psf2.h"
 
-enum ConsoleColor : uint32_t {
+namespace KtCore
+{
+enum ConsoleColor : uint32_t
+{
     // ARGB
     CC_BLACK = 0xFF000000,
     CC_WHITE = 0xFFFFFFFF,
@@ -12,8 +14,20 @@ enum ConsoleColor : uint32_t {
     CC_BLUE = 0xFF0000FF
 };
 
-namespace KtCore {
-class FramebufferConsole {
+struct PSF2Header
+{
+    uint32_t m_magic;
+    uint32_t m_version;
+    uint32_t m_headerSize;
+    uint32_t m_flags;
+    uint32_t m_length;
+    uint32_t m_charSize;
+    uint32_t m_height;
+    uint32_t m_width;
+};
+
+class FramebufferConsole
+{
 public:
     bool initialize();
     void shutdown();

@@ -12,8 +12,10 @@ BraceWrapping:
   AfterFunction: true
   AfterControlStatement: MultiLine
   BeforeElse: false
-  AfterClass: false
-  AfterNamespace: false
+  AfterClass: true
+  AfterStruct: true
+  AfterEnum: true
+  AfterNamespace: true
   AfterExternBlock: true
 
 SpaceBeforeParens: ControlStatements
