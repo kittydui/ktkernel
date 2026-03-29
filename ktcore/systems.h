@@ -1,10 +1,12 @@
 #pragma once
+#include "subsystems/acpi/rsdp.h"
 #include "subsystems/console/console.h"
 
 namespace KtCore {
 
 struct KernelContext {
     FramebufferConsole* m_console = nullptr;
+    RSDP* m_rsdp = nullptr;
 };
 
 inline KernelContext* g_KernelContext = nullptr;

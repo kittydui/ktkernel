@@ -15,6 +15,9 @@ void InitializeSubsystems()
     static KtCore::FramebufferConsole console;
     ctx.m_console = &console;
     ctx.m_console->initialize();
+
+    ctx.m_rsdp = reinterpret_cast<KtCore::RSDP*>(g_rsdpRequest.response->address);
+    ctx.m_rsdp->initialize();
 }
 
 bool CheckLimineFeatures()
@@ -23,6 +26,9 @@ bool CheckLimineFeatures()
         return false;
 
     if (g_framebufferRequest.response == nullptr || g_framebufferRequest.response->framebuffer_count < 1)
+        return false;
+
+    if (g_rsdpRequest.response == nullptr || g_rsdpRequest.response->address == nullptr)
         return false;
 
     return true;
