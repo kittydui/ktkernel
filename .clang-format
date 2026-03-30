@@ -23,8 +23,8 @@ BraceWrapping:
 SpaceBeforeParens: ControlStatements
 
 BreakBeforeConceptDeclarations: true
-NamespaceIndentation: None
-IndentExternBlock: NoIndent
+NamespaceIndentation: All
+IndentExternBlock: Indent
 
 Cpp11BracedListStyle: false
 AlignAfterOpenBracket: Align

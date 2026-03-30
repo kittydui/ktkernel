@@ -37,7 +37,14 @@ SECTIONS {
   } : rodata
 
   . = ALIGN(CONSTANT(MAXPAGESIZE));
-  
+ 
+  .init_array : {
+    PROVIDE(__init_array_start = .);
+    KEEP(*(SORT_BY_INIT_PRIORITY(.init_array.*) SORT_BY_INIT_PRIORITY(.ctors.*)))
+    KEEP(*(.init_array .ctors))
+    PROVIDE(__init_array_end = .);
+  }
+
   .data : {
     *(.data .data.*)
     data_end = .;

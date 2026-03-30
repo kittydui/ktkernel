@@ -5,8 +5,8 @@
 
 namespace KtCore
 {
-bool RSDP::initialize()
-{
-    return true;
-}
+    bool RSDP::initialize()
+    {
+        return true;
+    }
 } // namespace KtCore

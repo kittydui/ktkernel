@@ -2,6 +2,6 @@
 
 namespace KtKernel
 {
-bool CheckLimineFeatures();
-void InitializeSubsystems();
+    bool CheckLimineFeatures();
+    void InitializeSubsystems();
 } // namespace KtKernel
