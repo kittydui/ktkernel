@@ -12,7 +12,9 @@ bool FramebufferConsole::initialize()
     return m_framebuffer != nullptr && m_font != nullptr;
 }
 
-void FramebufferConsole::shutdown() {}
+void FramebufferConsole::shutdown()
+{
+}
 
 void FramebufferConsole::drawCharacter(int x, int y, char c, uint32_t foreground, uint32_t background)
 {

@@ -1,5 +1,5 @@
 qemu-system-x86_64 \
-  -m 512 \
+  -m 4096 \
   -machine q35 \
   -bios ./OVMF.fd \
   -cdrom ./ktOS.iso \

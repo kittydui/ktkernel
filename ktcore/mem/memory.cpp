@@ -1,5 +1,4 @@
 #include "mem/memory.h"
-
 #include <cstdint>
 
 extern "C"

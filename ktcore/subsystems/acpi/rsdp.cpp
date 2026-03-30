@@ -1,14 +1,12 @@
 #include "subsystems/acpi/rsdp.h"
 #include "systems.h"
 
+// TODO: Proper ACPI/RSDP/XSDT implementation :3
+
 namespace KtCore
 {
 bool RSDP::initialize()
 {
-    KtCore::KPrint("ACPI Version {}\n", this->m_revision);
-
-    // checksum validation
-
     return true;
 }
 } // namespace KtCore

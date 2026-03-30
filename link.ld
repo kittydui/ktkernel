@@ -21,7 +21,9 @@ SECTIONS {
   . = ALIGN(CONSTANT(MAXPAGESIZE));
 
   .text : {
+    text_start = .;
     *(.text .text.*)
+    text_end = .;
   } : text
 
   . = ALIGN(CONSTANT(MAXPAGESIZE));
@@ -38,11 +40,15 @@ SECTIONS {
   
   .data : {
     *(.data .data.*)
+    data_end = .;
   } : data
 
   .bss : {
+    bss_start = .;
     *(.bss .bss.*)
     *(COMMON)
+    bss_end = .;
+    kernel_end = .;
   } : data
 
   /DISCARD/ : {

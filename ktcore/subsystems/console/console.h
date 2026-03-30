@@ -1,5 +1,6 @@
 #pragma once
 #include "limine/limine.h"
+#include "mem/vector.h"
 #include "subsystems/console/format.h"
 
 namespace KtCore
@@ -43,10 +44,11 @@ public:
 
     template <typename... Args> void printf(uint32_t fg, uint32_t bg, const char* format, Args... args)
     {
-        Internal::FormatBuffer buf{ m_fmtBuffer, sizeof(m_fmtBuffer), 0 };
+        m_fmtBuffer.clear();
+        Internal::FormatBuffer buf{ m_fmtBuffer };
         Internal::FormatImpl(buf, format, args...);
         buf.terminate();
-        print(m_fmtBuffer, fg, bg);
+        print(m_fmtBuffer.data(), fg, bg);
     }
 
 private:
@@ -57,7 +59,7 @@ private:
     PSF2Header* m_font = nullptr;
     uint32_t m_cursorX = 0;
     uint32_t m_cursorY = 0;
-    char m_fmtBuffer[1024]{};
+    Vector<char> m_fmtBuffer;
 };
 
 } // namespace KtCore

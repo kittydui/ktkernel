@@ -1,6 +1,9 @@
 #pragma once
 #include "subsystems/acpi/rsdp.h"
 #include "subsystems/console/console.h"
+#include "subsystems/heap/slab.h"
+#include "subsystems/pmm/pmm.h"
+#include "subsystems/vmm/vmm.h"
 
 namespace KtCore
 {
@@ -8,12 +11,10 @@ struct KernelContext
 {
     FramebufferConsole* m_console = nullptr;
     RSDP* m_rsdp = nullptr;
+    PMM* m_pmm = nullptr;
+    VMM* m_vmm = nullptr;
+    SlabAllocator* m_allocator = nullptr;
 };
 
 inline KernelContext* g_kernelContext = nullptr;
-
-template <typename... Args> inline void KPrint(const char* str, Args... args)
-{
-    g_kernelContext->m_console->printf(str, args...);
-}
 } // namespace KtCore

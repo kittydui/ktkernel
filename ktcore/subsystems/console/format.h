@@ -1,28 +1,25 @@
 #pragma once
 #include <cstddef>
 #include <cstdint>
+#include "mem/vector.h"
 
 namespace KtCore::Internal
 {
 struct FormatBuffer
 {
-    char* m_data;
-    size_t m_capacity;
-    size_t m_pos;
+    Vector<char>& m_buffer;
 
-    void putChar(char c)
-    {
-        if (m_pos < m_capacity - 1)
-            m_data[m_pos++] = c;
-    }
+    explicit FormatBuffer(Vector<char>& buf) : m_buffer(buf) {}
+
+    void putChar(char c) { m_buffer.pushBack(c); }
 
     void putString(const char* s)
     {
-        while (*s && m_pos < m_capacity - 1)
-            m_data[m_pos++] = *s++;
+        while (*s)
+            m_buffer.pushBack(*s++);
     }
 
-    void terminate() { m_data[m_pos] = '\0'; }
+    void terminate() { m_buffer.pushBack('\0'); }
 };
 
 inline void WriteDecimal(FormatBuffer& buf, uint64_t value)
