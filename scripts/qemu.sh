@@ -6,5 +6,6 @@ qemu-system-x86_64 \
   -boot d \
   -no-reboot \
   -no-shutdown \
+  -serial stdio \
   -d int \
   -D qemu.log
