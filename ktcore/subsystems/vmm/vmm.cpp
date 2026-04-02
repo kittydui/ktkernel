@@ -1,8 +1,9 @@
 #include "subsystems/vmm/vmm.h"
-#include "cpu/utilities.h"
 #include "limine/requests.h"
 #include "mem/memory.h"
 #include "systems.h"
+
+#include <kt/intrin.h>
 
 namespace KtCore
 {

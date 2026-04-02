@@ -1,8 +1,18 @@
 git clone https://codeberg.org/Limine/Limine.git limine --branch=v10.x-binary --depth=1
 make -C limine
-mkdir -p root/boot/fonts
+
+mkdir -p root/boot/
 cp -v build/ktkernel root/boot/
-cp -v fonts/Lat2-Terminus16.psfu root/boot/fonts/terminus16.psfu
+
+mkdir -p root/system/modules
+mkdir -p root/system/fonts
+
+cp -v config.toml root/system/
+cp -v fonts/Lat2-Terminus16.psfu root/system/fonts/
+cp -v build/modules/cmos.ktdrv root/system/modules/
+
+tar -cvf root/boot/system.tar -C root/system .
+
 mkdir -p root/boot/limine
 cp -v limine.conf limine/limine-bios.sys limine/limine-bios-cd.bin limine/limine-uefi-cd.bin root/boot/limine/
 

@@ -11,7 +11,7 @@ set(CMAKE_C_COMPILER_WORKS 1 CACHE INTERNAL "")
 set(CMAKE_CXX_COMPILER_WORKS 1 CACHE INTERNAL "")
 set(CMAKE_ASM_COMPILER_WORKS 1 CACHE INTERNAL "")
 
-set(FREESTANDING_FLAGS "-ffreestanding -fno-builtin -fno-stack-protector -mno-red-zone -Wall -Wextra -O2 -fno-stack-check -fno-lto -fno-PIC -ffunction-sections -fdata-sections -m64 -march=x86-64 -mno-sse2 -mno-sse -mno-mmx -mcmodel=kernel -fno-threadsafe-statics -mabi=sysv -fno-exceptions -fno-rtti")
+set(FREESTANDING_FLAGS "-ffreestanding -fno-builtin -fno-stack-protector -mno-red-zone -Wall -Wextra -O2 -g -gdwarf-4 -fno-stack-check -fno-lto -fno-PIC -ffunction-sections -fdata-sections -m64 -march=x86-64 -mno-sse2 -mno-sse -mno-mmx -mcmodel=kernel -fno-threadsafe-statics -mabi=sysv -fno-exceptions -fno-rtti")
 
 set(CMAKE_C_FLAGS_INIT "${FREESTANDING_FLAGS}")
 set(CMAKE_CXX_FLAGS_INIT "${FREESTANDING_FLAGS}")
