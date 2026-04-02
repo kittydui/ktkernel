@@ -30,6 +30,10 @@ SECTIONS {
 
   .rodata : {
     *(.rodata .rodata.*)
+    . = ALIGN(8);
+    __ktsymbol_start = .;
+    KEEP(*(.ktsymbols))
+    __ktsymbol_end = .;
   } : rodata
 
   .note.gnu.build-id : {

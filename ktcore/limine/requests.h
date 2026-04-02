@@ -13,6 +13,7 @@ namespace Limine
         extern volatile limine_memmap_request memmapRequest;
         extern volatile limine_hhdm_request hhdmRequest;
         extern volatile limine_module_request moduleRequest;
+        extern volatile limine_mp_request mpRequest;
 
         extern volatile uint64_t limineRequestsStartMarker[];
         extern volatile uint64_t limineRequestsEndMarker[];

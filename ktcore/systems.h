@@ -5,6 +5,8 @@
 #include "subsystems/pmm/pmm.h"
 #include "subsystems/vmm/vmm.h"
 
+#include <kt/types.h>
+
 namespace KtCore
 {
     struct KernelContext
@@ -14,6 +16,7 @@ namespace KtCore
         PMM* m_pmm = nullptr;
         VMM* m_vmm = nullptr;
         SlabAllocator* m_allocator = nullptr;
+        KtDateTime* m_currentTime = nullptr;
     };
 
     inline KernelContext* g_kernelContext = nullptr;

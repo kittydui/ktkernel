@@ -1,9 +1,11 @@
 #include "core/init.h"
-#include "cpu/utilities.h"
 #include "limine/requests.h"
-#include "systems.h"
-
+#include "modules/loader.h"
 #include "subsystems/console/logging.h"
+#include "systems.h"
+#include "utilities/tar.h"
+
+#include <kt/intrin.h>
 
 namespace KtKernel
 {
@@ -28,19 +30,29 @@ namespace KtKernel
         ctx.m_allocator->initialize();
 
         // Initialize everything else, do NOT initialize anything before the PMM, VMM and Allocator.
+        auto* system_tar = Limine::moduleRequest.response->modules[0];
+
+        TarArchive systems_archive;
+        systems_archive.open(system_tar->address, system_tar->size);
+
+        auto font = systems_archive.readFile("fonts/Lat2-Terminus16.psfu");
 
         static KtCore::Console console;
         ctx.m_console = &console;
-        ctx.m_console->initialize();
+        ctx.m_console->initialize((void*)font.m_data);
 
         static KtCore::SerialPort com1_port;
         com1_port.initialize(KtCore::COM1_PORT);
         ctx.m_console->attachSerialPort(&com1_port);
 
-        KtCore::KPrint("{}MB Available\n", KtCore::BytesToMB(ctx.m_pmm->getTotalMemory()));
+        ctx.m_currentTime = reinterpret_cast<KtDateTime*>(KtCore::KMalloc(sizeof(KtDateTime)));
+
+        KtCore::KPrint("{}MB Available", KtCore::BytesToMB(ctx.m_pmm->getTotalMemory()));
 
         ctx.m_rsdp = reinterpret_cast<KtCore::RSDP*>(Limine::rsdpRequest.response->address);
         ctx.m_rsdp->initialize();
+
+        LoadCoreModules();
     }
 
     bool CheckLimineFeatures()

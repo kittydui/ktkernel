@@ -12,6 +12,14 @@ endif()
 #  fonts/**.o
 #)
 
+include(cmake/ModuleCompiler.cmake)
+
+add_kernel_module(cmos
+    SOURCES modules/cmos/cmos.cpp
+    INCLUDES kt/ modules/cmos/
+    #COMPILE_FLAGS -O2
+)
+
 file(GLOB_RECURSE ktcore_sources
   ktcore/**.cpp
   ktcore/**.c
@@ -21,7 +29,7 @@ file(GLOB_RECURSE ktcore_sources
 )
 
 add_library(ktcore STATIC ${ktcore_sources})
-target_include_directories(ktcore PRIVATE ktcore/)
+target_include_directories(ktcore PRIVATE ktcore/ kt/)
 
 file(GLOB_RECURSE ktkernel_sources
   ktkernel/**.cpp
@@ -32,6 +40,9 @@ file(GLOB_RECURSE ktkernel_sources
 )
 
 add_executable(ktkernel ${ktkernel_sources})
-target_link_libraries(ktkernel PRIVATE ktcore)
-target_include_directories(ktkernel PRIVATE ktkernel/ ktcore/)
+target_compile_definitions(ktkernel PRIVATE QEMU)
+target_link_libraries(ktkernel PRIVATE -Wl,--whole-archive ktcore -Wl,--no-whole-archive)
+target_include_directories(ktkernel PRIVATE ktkernel/ ktcore/ kt/)
 target_link_options(ktkernel PRIVATE -T${CMAKE_SOURCE_DIR}/link.ld)
+
+modulec_merge_compdb()

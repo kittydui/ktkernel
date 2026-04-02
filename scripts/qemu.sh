@@ -8,4 +8,6 @@ qemu-system-x86_64 \
   -no-shutdown \
   -serial stdio \
   -d int \
-  -D qemu.log
+  -D qemu.log \
+  -device isa-debug-exit,iobase=0xf4,iosize=0x04 \
+  #-s -S

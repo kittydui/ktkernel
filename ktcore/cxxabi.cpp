@@ -1,4 +1,4 @@
-#include "cpu/utilities.h"
+#include <kt/intrin.h>
 
 extern "C"
 {

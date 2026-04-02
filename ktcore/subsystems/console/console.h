@@ -3,6 +3,7 @@
 #include "mem/vector.h"
 #include "subsystems/console/format.h"
 #include "subsystems/console/serial.h"
+#include <cstdarg>
 
 namespace KtCore
 {
@@ -31,7 +32,7 @@ namespace KtCore
     class Console
     {
     public:
-        bool initialize();
+        bool initialize(void* fontFile);
         void shutdown();
 
         void attachSerialPort(SerialPort* port);
@@ -39,6 +40,7 @@ namespace KtCore
         void putChar(char c, uint32_t foreground, uint32_t background);
         void print(const char* str, uint32_t foreground = CC_WHITE, uint32_t background = CC_BLACK);
         void clear(uint32_t color = CC_BLACK);
+        void vprintf(const char* fmt, va_list args, uint32_t fg = CC_WHITE, uint32_t bg = CC_BLACK);
 
         template <typename... Args> void printf(const char* format, Args... args)
         {

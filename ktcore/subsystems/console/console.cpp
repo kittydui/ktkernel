@@ -1,14 +1,15 @@
 #include "subsystems/console/console.h"
 #include "limine/requests.h"
 #include "mem/memory.h"
+#include <cstdarg>
 
 namespace KtCore
 {
-    bool Console::initialize()
+    bool Console::initialize(void* fontFile)
     {
         // by this time we know that the framebuffer request was valid.
         m_framebuffer = Limine::framebufferRequest.response->framebuffers[0];
-        m_font = reinterpret_cast<PSF2Header*>(Limine::moduleRequest.response->modules[0]->address);
+        m_font = reinterpret_cast<PSF2Header*>(fontFile);
         return m_framebuffer != nullptr && m_font != nullptr;
     }
 
@@ -100,5 +101,85 @@ namespace KtCore
             if (m_serialPort != nullptr)
                 m_serialPort->writeChar(c);
         }
+    }
+
+    void Console::vprintf(const char* fmt, va_list args, uint32_t fg, uint32_t bg)
+    {
+        m_fmtBuffer.clear();
+        Internal::FormatBuffer buf{ m_fmtBuffer };
+
+        while (*fmt) {
+            if (*fmt != '%') {
+                buf.putChar(*fmt++);
+                continue;
+            }
+            fmt++;
+
+            if (*fmt == '%') {
+                buf.putChar('%');
+                fmt++;
+                continue;
+            }
+
+            int longCount = 0;
+            while (*fmt == 'l') {
+                longCount++;
+                fmt++;
+            }
+
+            switch (*fmt) {
+            case 'd':
+            case 'i': {
+                int64_t val = (longCount >= 2) ? va_arg(args, long long)
+                            : (longCount == 1) ? va_arg(args, long)
+                                               : va_arg(args, int);
+                if (val < 0) {
+                    buf.putChar('-');
+                    Internal::WriteDecimal(buf, -static_cast<uint64_t>(val));
+                } else {
+                    Internal::WriteDecimal(buf, static_cast<uint64_t>(val));
+                }
+                break;
+            }
+            case 'u': {
+                uint64_t val = (longCount >= 2) ? va_arg(args, unsigned long long)
+                             : (longCount == 1) ? va_arg(args, unsigned long)
+                                                : va_arg(args, unsigned int);
+                Internal::WriteDecimal(buf, val);
+                break;
+            }
+            case 'x': {
+                uint64_t val = (longCount >= 2) ? va_arg(args, unsigned long long)
+                             : (longCount == 1) ? va_arg(args, unsigned long)
+                                                : va_arg(args, unsigned int);
+                Internal::WriteHex(buf, val);
+                break;
+            }
+            case 's': {
+                const char* s = va_arg(args, const char*);
+                buf.putString(s ? s : "(null)");
+                break;
+            }
+            case 'c': {
+                char c = static_cast<char>(va_arg(args, int));
+                buf.putChar(c);
+                break;
+            }
+            case 'p': {
+                void* p = va_arg(args, void*);
+                buf.putString("0x");
+                Internal::WriteHex(buf, reinterpret_cast<uintptr_t>(p));
+                break;
+            }
+            default:
+                buf.putChar('%');
+                buf.putChar(*fmt);
+                break;
+            }
+            fmt++;
+        }
+
+        buf.terminate();
+        print(m_fmtBuffer.data(), fg, bg);
     }
 } // namespace KtCore

@@ -1,5 +1,5 @@
 #include "subsystems/console/serial.h"
-#include "cpu/utilities.h"
+#include <kt/intrin.h>
 
 namespace KtCore
 {

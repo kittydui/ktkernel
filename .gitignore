@@ -4,3 +4,6 @@ ktOS.iso
 compile_commands.json
 .cache/
 qemu.log
+target/
+modulec/target/
+modulec/Cargo.lock
