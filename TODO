@@ -3,3 +3,4 @@
 * RSDP Checksum validation.
 * PIT Module
 * PS/2 Module
+* Do general code cleanup and checking over code style
