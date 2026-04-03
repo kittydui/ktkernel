@@ -1,6 +1,5 @@
 #include "core/init.h"
-#include "cpu/utilities.h"
-#include "cxxabi.h"
+#include "cpu/gdt.h"
 #include "subsystems/console/logging.h"
 #include "systems.h"
 
@@ -14,6 +13,9 @@
 
 extern "C" [[noreturn]] void KtMain()
 {
+    GDTR gdtr = { sizeof(KtCore::GDT) - 1, KtCore::GDT };
+    loadGdt(gdtr);
+
     KtKernel::InitializeSubsystems();
 
     KtModule* mod = KtKernel::GetModule("cmos_driver");

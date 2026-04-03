@@ -48,3 +48,14 @@ inline void ioWait()
 {
     outb(0x80, 0);
 }
+
+struct __attribute__((packed)) GDTR
+{
+    uint16_t size;
+    uint64_t* base;
+};
+
+inline void loadGdt(GDTR gdtr)
+{
+    asm volatile("lgdt %0" ::"m"(gdtr));
+}
