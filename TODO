@@ -1,6 +1,0 @@
-* Implement ACPICA (from Intel) and start to find hardware devices.
-* RSDP Checksum validation.
-* PIT Module
-* PS/2 Module
-* Do general code cleanup and checking over code style
-* setup APIC
