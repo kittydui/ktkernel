@@ -29,7 +29,7 @@ namespace KtCore
                     return nullptr;
 
                 auto* page = reinterpret_cast<uint64_t*>(frame + m_hhdmOffset);
-                memset(page, 0, 512);
+                memset(page, 0, 512 * sizeof(uint64_t));
 
                 table[index] = frame | PageFlags::PRESENT | PageFlags::WRITABLE;
             }
