@@ -1,9 +1,7 @@
-root/
-build/
+/root
+/target
+!/.cargo
 ktOS.iso
-compile_commands.json
-.cache/
+Cargo.lock
 qemu.log
-target/
-modulec/target/
-modulec/Cargo.lock
+.cache/

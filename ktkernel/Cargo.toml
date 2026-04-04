@@ -1,0 +1,18 @@
+[package]
+name = "ktkernel"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+limine = "0.6.3"
+
+[profile.dev]
+panic = "abort"
+lto = false
+
+[profile.dev.package."*"]
+opt-level = 2
+
+[profile.release]
+panic = "abort"
+opt-level = 2

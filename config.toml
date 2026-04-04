@@ -1,0 +1,5 @@
+[kernel]
+name = "ktOS"
+
+[modules]
+cmos = true
