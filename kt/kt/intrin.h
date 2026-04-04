@@ -51,11 +51,34 @@ inline void ioWait()
 
 struct __attribute__((packed)) GDTR
 {
-    uint16_t size;
-    uint64_t* base;
+    uint16_t m_size;
+    uint64_t* m_base;
 };
 
 inline void loadGdt(GDTR gdtr)
 {
     asm volatile("lgdt %0" ::"m"(gdtr));
+}
+
+struct __attribute__((packed)) IDTEntry
+{
+    uint16_t m_isrLow;
+    uint16_t m_kernelCs;
+    uint8_t m_ist;
+    uint8_t m_attributes;
+    uint16_t m_isrMid;
+    uint32_t m_isrHigh;
+    uint32_t m_reserved;
+};
+
+struct __attribute__((packed)) IDTR
+{
+    uint16_t m_limit;
+    uint64_t m_base;
+};
+
+inline void loadIdt(IDTR idtr)
+{
+    asm volatile("lidt %0" ::"m"(idtr));
+    asm volatile("sti");
 }

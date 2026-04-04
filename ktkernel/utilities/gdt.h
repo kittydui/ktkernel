@@ -1,7 +1,7 @@
 #pragma once
 #include <cstdint>
 
-namespace KtCore
+namespace KtKernel
 {
     // Credit to lukflug of osdev.wiki Discord Server.
     static uint64_t GDT[] = {
@@ -18,4 +18,8 @@ namespace KtCore
          * in order to set that up, you'll need some knowledge of the segment descriptor and TSS layout */
     };
 
-} // namespace KtCore
+    constexpr uint16_t KERNEL_CODE_SELECTOR = 0x28;
+    constexpr uint16_t KERNEL_DATA_SELECTOR = 0x30;
+
+    bool SetupGdt();
+} // namespace KtKernel
