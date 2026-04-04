@@ -22,6 +22,6 @@ namespace KtCore
         g_kernelContext->m_console->print("========== PANIC! ==========", CC_WHITE, CC_RED);
 
         while (true)
-            asm volatile("hlt");
+            asm volatile("cli; hlt");
     }
 } // namespace KtCore
