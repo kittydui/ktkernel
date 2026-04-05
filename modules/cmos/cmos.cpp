@@ -3,38 +3,38 @@
 #include <kt/module.h>
 #include <kt/types.h>
 
-constexpr auto CMOS_ADDRESS = 0x70;
-constexpr auto CMOS_DATA = 0x71;
+constexpr auto cmos_address = 0x70;
+constexpr auto cmos_data = 0x71;
 
-bool UpdateInProgress()
+static bool update_in_progress()
 {
-    outb(CMOS_ADDRESS, 0x0A);
-    return (inb(CMOS_DATA) & 0x80);
+    outb(cmos_address, 0x0A);
+    return (inb(cmos_data) & 0x80);
 }
 
-uint8_t GetCmosData(int reg)
+static uint8_t get_cmos_data(int reg)
 {
-    outb(CMOS_ADDRESS, reg);
-    return inb(CMOS_DATA);
+    outb(cmos_address, reg);
+    return inb(cmos_data);
 }
 
-uint8_t BcdToBinary(uint8_t bcd)
+static uint8_t bcd_to_binary(uint8_t bcd)
 {
     return ((bcd & 0xF0) >> 4) * 10 + (bcd & 0x0F);
 }
 
-void CmosShutdown(KtModule* module)
+static void cmos_shutdown(kt_module*)
 {
 }
 
-KtStatus CmosRead(KtModule* module, void* buffer, size_t size)
+static kt_status cmos_read(kt_module*, void* buffer, size_t size)
 {
-    if (size < sizeof(KtDateTime))
-        return KtStatus::FAILED;
+    if (size < sizeof(kt_date_time))
+        return kt_status::failed;
 
-    auto* time = reinterpret_cast<KtDateTime*>(buffer);
+    auto* time = reinterpret_cast<kt_date_time*>(buffer);
 
-    while (UpdateInProgress())
+    while (update_in_progress())
         ;
 
     uint8_t second;
@@ -44,56 +44,56 @@ KtStatus CmosRead(KtModule* module, void* buffer, size_t size)
     uint8_t month;
     uint8_t year;
 
-    time->m_Second = GetCmosData(0x00);
-    time->m_Minute = GetCmosData(0x02);
-    time->m_Hour = GetCmosData(0x04);
-    time->m_Day = GetCmosData(0x07);
-    time->m_Month = GetCmosData(0x08);
-    time->m_Year = GetCmosData(0x09);
+    time->second = get_cmos_data(0x00);
+    time->minute = get_cmos_data(0x02);
+    time->hour = get_cmos_data(0x04);
+    time->day = get_cmos_data(0x07);
+    time->month = get_cmos_data(0x08);
+    time->year = get_cmos_data(0x09);
 
     do {
-        second = time->m_Second;
-        minute = time->m_Minute;
-        hour = time->m_Hour;
-        day = time->m_Day;
-        month = time->m_Month;
-        year = time->m_Year;
+        second = time->second;
+        minute = time->minute;
+        hour = time->hour;
+        day = time->day;
+        month = time->month;
+        year = time->year;
 
-        while (UpdateInProgress())
+        while (update_in_progress())
             ;
 
-        time->m_Second = GetCmosData(0x00);
-        time->m_Minute = GetCmosData(0x02);
-        time->m_Hour = GetCmosData(0x04);
-        time->m_Day = GetCmosData(0x07);
-        time->m_Month = GetCmosData(0x08);
-        time->m_Year = GetCmosData(0x09);
-    } while ((second != time->m_Second) || (minute != time->m_Minute) || (hour != time->m_Hour) ||
-             (day != time->m_Day) || (month != time->m_Month) || (year != time->m_Year));
+        time->second = get_cmos_data(0x00);
+        time->minute = get_cmos_data(0x02);
+        time->hour = get_cmos_data(0x04);
+        time->day = get_cmos_data(0x07);
+        time->month = get_cmos_data(0x08);
+        time->year = get_cmos_data(0x09);
+    } while ((second != time->second) || (minute != time->minute) || (hour != time->hour) ||
+             (day != time->day) || (month != time->month) || (year != time->year));
 
-    uint8_t status_b = GetCmosData(0x0B);
+    uint8_t status_b = get_cmos_data(0x0B);
 
     if (!(status_b & 0x04)) {
-        time->m_Second = BcdToBinary(time->m_Second);
-        time->m_Minute = BcdToBinary(time->m_Minute);
-        time->m_Hour = BcdToBinary(time->m_Hour);
-        time->m_Day = BcdToBinary(time->m_Day);
-        time->m_Month = BcdToBinary(time->m_Month);
-        time->m_Year = BcdToBinary(time->m_Year);
+        time->second = bcd_to_binary(time->second);
+        time->minute = bcd_to_binary(time->minute);
+        time->hour = bcd_to_binary(time->hour);
+        time->day = bcd_to_binary(time->day);
+        time->month = bcd_to_binary(time->month);
+        time->year = bcd_to_binary(time->year);
     }
 
-    if (!(status_b & 0x02) && (time->m_Hour & 0x80))
-        time->m_Hour = ((time->m_Hour & 0x7F) + 12) % 24;
+    if (!(status_b & 0x02) && (time->hour & 0x80))
+        time->hour = ((time->hour & 0x7F) + 12) % 24;
 
-    return KtStatus::SUCCESS;
+    return kt_status::success;
 }
 
-KtStatus ModuleEntry(KtModule* module)
+static kt_status module_entry(kt_module* module)
 {
-    module->m_dispatchFunctions.Shutdown = CmosShutdown;
-    module->m_dispatchFunctions.Read = CmosRead;
+    module->dispatch_functions.shutdown = cmos_shutdown;
+    module->dispatch_functions.read = cmos_read;
 
-    return KtStatus::SUCCESS;
+    return kt_status::success;
 }
 
-KtDeclareModule("cmos_driver", ModuleEntry);
+kt_declare_module("cmos_driver", module_entry);

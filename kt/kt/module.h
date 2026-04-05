@@ -2,33 +2,33 @@
 #include <cstddef>
 #include <cstdint>
 
-enum KtStatus : uint32_t
+enum class kt_status : uint32_t
 {
-    FAILED = 0xB0000000,
-    SUCCESS = 0xB0000001,
+    failed = 0xB0000000,
+    success = 0xB0000001,
 };
 
-struct KtModule;
+struct kt_module;
 
-struct KtDispatch
+struct kt_dispatch
 {
-    void (*Shutdown)(KtModule*);
-    KtStatus (*Read)(KtModule*, void* buffer, size_t size);
-    KtStatus (*Write)(KtModule*, const void* buffer, size_t size);
-    KtStatus (*Close)(KtModule*);
+    void (*shutdown)(kt_module*);
+    kt_status (*read)(kt_module*, void* buffer, size_t size);
+    kt_status (*write)(kt_module*, const void* buffer, size_t size);
+    kt_status (*close)(kt_module*);
 };
 
-struct KtModule
+struct kt_module
 {
-    KtDispatch m_dispatchFunctions;
-    void* m_privateData;
+    kt_dispatch dispatch_functions;
+    void* private_data;
 };
 
-using KtModuleEntry = KtStatus (*)(KtModule*);
+using kt_module_entry = kt_status (*)(kt_module*);
 
 // clang-format off
-#define KtDeclareModule(name, entryPoint) \
-    extern "C" __attribute__((used, section(".ktdrv"))) KtModuleEntry KtDriverEntry = entryPoint; \
-    extern "C" __attribute__((used, section(".ktdrv"))) const char* KtDriverName = name;
+#define kt_declare_module(name, entry_point) \
+    extern "C" __attribute__((used, section(".ktdrv"))) kt_module_entry kt_driver_entry = entry_point; \
+    extern "C" __attribute__((used, section(".ktdrv"))) const char* kt_driver_name = name;
 
 // clang-format on

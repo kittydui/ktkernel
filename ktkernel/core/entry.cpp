@@ -1,44 +1,28 @@
 #include "core/init.h"
+#include "interrupts/interrupts.h"
 #include "modules/loader.h"
 #include "subsystems/console/logging.h"
-#include "systems.h"
-
-#include <kt/types.h>
-
-#if defined(QEMU)
-#include "devices/qemu/debug_port.h"
-#endif
-
-#include "interrupts/interrupts.h"
 #include "utilities/gdt.h"
 
-namespace KtKernel
+#include <kt/module.h>
+#include <kt/types.h>
+
+namespace kt_kernel
 {
-    extern "C" [[noreturn]] void KtMain()
+    extern "C" [[noreturn]] void kt_main()
     {
-        SetupGdt();
-        InitializeSubsystems();
-        SetupIdt(); // setup interrupts after initializing the console
-                    // so we can show that an interrupt was called.
+        initialize_subsystems();
+        setup_gdt();
+        setup_idt();
 
-        KtModule* mod = KtKernel::GetModule("cmos_driver");
+        kt_module* mod = get_module("cmos_driver");
 
-        mod->m_dispatchFunctions.Read(mod, KtCore::g_kernelContext->m_currentTime, sizeof(KtDateTime));
+        mod->dispatch_functions.read(mod, g_kernel_context->current_time, sizeof(kt_date_time));
 
-        auto* time = KtCore::g_kernelContext->m_currentTime;
-        KtCore::KPrint("time: {}:{}:{} {}/{}/{}",
-                       time->m_Hour,
-                       time->m_Minute,
-                       time->m_Second,
-                       time->m_Day,
-                       time->m_Month,
-                       time->m_Year);
+        auto* time = g_kernel_context->current_time;
+        print("time: {}:{}:{} {}/{}/{}", time->hour, time->minute, time->second, time->day, time->month, time->year);
 
         while (true)
-            ;
-
-#if defined(QEMU)
-        KtCore::Qemu::Exit(0x10);
-#endif
+            asm volatile("hlt");
     }
-} // namespace KtKernel
+} // namespace kt_kernel

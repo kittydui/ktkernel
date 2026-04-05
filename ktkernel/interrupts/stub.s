@@ -15,7 +15,7 @@ isr_stub_\num:
     jmp isr_common
 .endm
 
-.extern InterruptDispatch
+.extern interrupt_dispatch
 
 isr_no_err_stub 0
 isr_no_err_stub 1
@@ -69,7 +69,7 @@ isr_common:
 
     mov rdi, [rsp + 120]
     mov rsi, [rsp + 128]
-    call InterruptDispatch
+    call interrupt_dispatch
 
     pop r15
     pop r14
@@ -89,8 +89,8 @@ isr_common:
     add rsp, 16
     iretq
 
-.global isrStubTable
-isrStubTable:
+.global isr_stub_table
+isr_stub_table:
 .altmacro
 .macro isr_stub_entry i
     .quad isr_stub_\i

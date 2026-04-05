@@ -2,77 +2,76 @@
 #include "limine/requests.h"
 #include "modules/loader.h"
 #include "subsystems/console/logging.h"
-#include "systems.h"
 #include "utilities/tar.h"
 
 #include <kt/intrin.h>
+#include <kt/types.h>
 
-namespace KtKernel
+namespace kt_kernel
 {
-    void InitializeSubsystems()
+    void initialize_subsystems()
     {
-        if (!CheckLimineFeatures())
+        if (!check_limine_requests())
             halt();
 
-        static KtCore::KernelContext ctx;
-        KtCore::g_kernelContext = &ctx;
+        static kernel_context ctx;
+        g_kernel_context = &ctx;
 
-        static KtCore::PMM pmm;
-        ctx.m_pmm = &pmm;
-        ctx.m_pmm->initialize();
+        static pmm physical_mm;
+        ctx.pmm = &physical_mm;
+        ctx.pmm->initialize();
 
-        static KtCore::VMM vmm;
-        ctx.m_vmm = &vmm;
-        ctx.m_vmm->initialize();
+        static vmm virtual_mm;
+        ctx.vmm = &virtual_mm;
+        ctx.vmm->initialize();
 
-        static KtCore::SlabAllocator allocator;
-        ctx.m_allocator = &allocator;
-        ctx.m_allocator->initialize();
+        static slab_allocator allocator;
+        ctx.allocator = &allocator;
+        ctx.allocator->initialize();
 
-        // Initialize everything else, do NOT initialize anything before the PMM, VMM and Allocator.
-        auto* system_tar = Limine::moduleRequest.response->modules[0];
+        auto* system_tar = limine::module_request.response->modules[0];
 
-        TarArchive systems_archive;
+        tar_archive systems_archive;
         systems_archive.open(system_tar->address, system_tar->size);
 
-        auto font = systems_archive.readFile("fonts/Lat2-Terminus16.psfu");
+        auto font = systems_archive.read_file("fonts/Lat2-Terminus16.psfu");
 
-        static KtCore::Console console;
-        ctx.m_console = &console;
-        ctx.m_console->initialize((void*)font.m_data);
+        static console kernel_console;
+        ctx.console = &kernel_console;
+        ctx.console->initialize((void*)font.data);
 
-        static KtCore::SerialPort com1_port;
-        com1_port.initialize(KtCore::COM1_PORT);
-        ctx.m_console->attachSerialPort(&com1_port);
+        static serial_port com1;
+        com1.initialize(com1_port);
+        ctx.console->attach_serial_port(&com1);
 
-        ctx.m_currentTime = reinterpret_cast<KtDateTime*>(KtCore::KMalloc(sizeof(KtDateTime)));
+        ctx.current_time = reinterpret_cast<kt_date_time*>(kmalloc(sizeof(kt_date_time)));
 
-        KtCore::KPrint("{}MB Available", KtCore::BytesToMB(ctx.m_pmm->getTotalMemory()));
+        print("{}MB Available", bytes_to_mb(ctx.pmm->get_total_memory()));
 
-        ctx.m_rsdp = reinterpret_cast<KtCore::RSDP*>(Limine::rsdpRequest.response->address);
-        ctx.m_rsdp->initialize();
+        ctx.rsdp = reinterpret_cast<rsdp*>(limine::rsdp_request.response->address);
+        ctx.rsdp->initialize();
 
-        LoadCoreModules();
+        load_core_modules();
     }
 
-    bool CheckLimineFeatures()
+    bool check_limine_requests()
     {
-        if (Limine::moduleRequest.response == nullptr || Limine::moduleRequest.response->module_count < 1)
+        if (limine::module_request.response == nullptr || limine::module_request.response->module_count < 1)
             return false;
 
-        if (Limine::framebufferRequest.response == nullptr ||
-            Limine::framebufferRequest.response->framebuffer_count < 1)
+        if (limine::framebuffer_request.response == nullptr ||
+            limine::framebuffer_request.response->framebuffer_count < 1)
             return false;
 
-        if (Limine::rsdpRequest.response == nullptr || Limine::rsdpRequest.response->address == nullptr)
+        if (limine::rsdp_request.response == nullptr || limine::rsdp_request.response->address == nullptr)
             return false;
 
-        if (Limine::memmapRequest.response == nullptr || Limine::memmapRequest.response->entry_count < 1)
+        if (limine::memmap_request.response == nullptr || limine::memmap_request.response->entry_count < 1)
             return false;
 
-        if (Limine::hhdmRequest.response == nullptr || Limine::hhdmRequest.response->offset == 0)
+        if (limine::hhdm_request.response == nullptr || limine::hhdm_request.response->offset == 0)
             return false;
 
         return true;
     }
-} // namespace KtKernel
+} // namespace kt_kernel
