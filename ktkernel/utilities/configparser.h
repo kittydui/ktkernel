@@ -3,32 +3,32 @@
 #include "mem/vector.h"
 #include <cstdint>
 
-namespace KtKernel
+namespace kt_kernel
 {
 
-    class TomlParser
+    class toml_parser
     {
     public:
-        enum class ValueType : uint8_t
+        enum class value_type : uint8_t
         {
-            String,
-            Bool,
-            Integer
+            string_val,
+            bool_val,
+            int_val
         };
 
-        struct Entry
+        struct entry
         {
-            char m_section[64];
-            char m_key[64];
-            char m_value[256];
-            ValueType m_type;
-            bool m_boolVal;
-            int64_t m_intVal;
+            char section[64];
+            char key[64];
+            char value[256];
+            value_type type;
+            bool bool_val;
+            int64_t int_val;
         };
 
         bool parse(const char* data, size_t length)
         {
-            m_entries.clear();
+            entries.clear();
             char current_section[64] = {};
             size_t pos = 0;
 
@@ -42,12 +42,12 @@ namespace KtKernel
                 if (pos < length)
                     pos++;
 
-                size_t i = skipWhitespace(data, line_start, line_end);
+                size_t i = skip_whitespace(data, line_start, line_end);
                 if (i >= line_end || data[i] == '#')
                     continue;
 
                 if (data[i] == '[') {
-                    parseSection(data, i + 1, line_end, current_section, sizeof(current_section));
+                    parse_section(data, i + 1, line_end, current_section, sizeof(current_section));
                     continue;
                 }
 
@@ -57,151 +57,151 @@ namespace KtKernel
                 if (eq_pos >= line_end)
                     continue;
 
-                Entry entry = {};
-                extractKey(data, i, eq_pos, entry.m_key, sizeof(entry.m_key));
-                strncpy(entry.m_section, current_section, sizeof(entry.m_section) - 1);
+                entry e = {};
+                extract_key(data, i, eq_pos, e.key, sizeof(e.key));
+                strncpy(e.section, current_section, sizeof(e.section) - 1);
 
-                size_t val_start = skipWhitespace(data, eq_pos + 1, line_end);
-                size_t val_end = trimTrailing(data, val_start, line_end);
-                parseValue(data, val_start, val_end, entry);
+                size_t val_start = skip_whitespace(data, eq_pos + 1, line_end);
+                size_t val_end = trim_trailing(data, val_start, line_end);
+                parse_value(data, val_start, val_end, e);
 
-                m_entries.pushBack(entry);
+                entries.push_back(e);
             }
 
             return true;
         }
 
-        const char* getString(const char* section, const char* key, const char* defaultVal = "") const
+        const char* get_string(const char* section, const char* key, const char* default_val = "") const
         {
-            const Entry* e = find(section, key);
+            const entry* e = find(section, key);
             if (!e)
-                return defaultVal;
-            return e->m_value;
+                return default_val;
+            return e->value;
         }
 
-        bool getBool(const char* section, const char* key, bool defaultVal = false) const
+        bool get_bool(const char* section, const char* key, bool default_val = false) const
         {
-            const Entry* e = find(section, key);
-            if (!e || e->m_type != ValueType::Bool)
-                return defaultVal;
-            return e->m_boolVal;
+            const entry* e = find(section, key);
+            if (!e || e->type != value_type::bool_val)
+                return default_val;
+            return e->bool_val;
         }
 
-        int64_t getInt(const char* section, const char* key, int64_t defaultVal = 0) const
+        int64_t get_int(const char* section, const char* key, int64_t default_val = 0) const
         {
-            const Entry* e = find(section, key);
-            if (!e || e->m_type != ValueType::Integer)
-                return defaultVal;
-            return e->m_intVal;
+            const entry* e = find(section, key);
+            if (!e || e->type != value_type::int_val)
+                return default_val;
+            return e->int_val;
         }
 
-        bool hasKey(const char* section, const char* key) const
+        bool has_key(const char* section, const char* key) const
         {
             return find(section, key) != nullptr;
         }
 
-        bool hasSection(const char* section) const
+        bool has_section(const char* section) const
         {
-            for (size_t i = 0; i < m_entries.size(); i++) {
-                if (strcmp(m_entries[i].m_section, section) == 0)
+            for (size_t i = 0; i < entries.size(); i++) {
+                if (strcmp(entries[i].section, section) == 0)
                     return true;
             }
             return false;
         }
 
-        size_t entryCount() const
+        size_t entry_count() const
         {
-            return m_entries.size();
+            return entries.size();
         }
 
-        const Entry& entry(size_t idx) const
+        const entry& get_entry(size_t idx) const
         {
-            return m_entries[idx];
+            return entries[idx];
         }
 
     private:
-        KtCore::Vector<Entry> m_entries;
+        vector<entry> entries;
 
-        const Entry* find(const char* section, const char* key) const
+        const entry* find(const char* section, const char* key) const
         {
-            for (size_t i = 0; i < m_entries.size(); i++) {
-                if (strcmp(m_entries[i].m_section, section) == 0 && strcmp(m_entries[i].m_key, key) == 0)
-                    return &m_entries[i];
+            for (size_t i = 0; i < entries.size(); i++) {
+                if (strcmp(entries[i].section, section) == 0 && strcmp(entries[i].key, key) == 0)
+                    return &entries[i];
             }
             return nullptr;
         }
 
-        static size_t skipWhitespace(const char* data, size_t from, size_t to)
+        static size_t skip_whitespace(const char* data, size_t from, size_t to)
         {
             while (from < to && (data[from] == ' ' || data[from] == '\t'))
                 from++;
             return from;
         }
 
-        static size_t trimTrailing(const char* data, size_t from, size_t to)
+        static size_t trim_trailing(const char* data, size_t from, size_t to)
         {
             while (to > from && (data[to - 1] == ' ' || data[to - 1] == '\t'))
                 to--;
             return to;
         }
 
-        static void parseSection(const char* data, size_t start, size_t end, char* out, size_t outSize)
+        static void parse_section(const char* data, size_t start, size_t end, char* out, size_t out_size)
         {
             size_t close = start;
             while (close < end && data[close] != ']')
                 close++;
 
-            size_t s = skipWhitespace(data, start, close);
-            size_t e = trimTrailing(data, s, close);
+            size_t s = skip_whitespace(data, start, close);
+            size_t e = trim_trailing(data, s, close);
             size_t len = e - s;
-            if (len >= outSize)
-                len = outSize - 1;
+            if (len >= out_size)
+                len = out_size - 1;
             strncpy(out, data + s, len);
             out[len] = '\0';
         }
 
-        static void extractKey(const char* data, size_t start, size_t eqPos, char* out, size_t outSize)
+        static void extract_key(const char* data, size_t start, size_t eq_pos, char* out, size_t out_size)
         {
-            size_t end = trimTrailing(data, start, eqPos);
+            size_t end = trim_trailing(data, start, eq_pos);
             size_t len = end - start;
-            if (len >= outSize)
-                len = outSize - 1;
+            if (len >= out_size)
+                len = out_size - 1;
             strncpy(out, data + start, len);
             out[len] = '\0';
         }
 
-        static void parseValue(const char* data, size_t start, size_t end, Entry& entry)
+        static void parse_value(const char* data, size_t start, size_t end, entry& e)
         {
             size_t len = end - start;
 
             if (len >= 2 && data[start] == '"' && data[end - 1] == '"') {
-                entry.m_type = ValueType::String;
+                e.type = value_type::string_val;
                 size_t s_len = len - 2;
-                if (s_len >= sizeof(entry.m_value))
-                    s_len = sizeof(entry.m_value) - 1;
-                unescapeString(data + start + 1, s_len, entry.m_value, sizeof(entry.m_value));
+                if (s_len >= sizeof(e.value))
+                    s_len = sizeof(e.value) - 1;
+                unescape_string(data + start + 1, s_len, e.value, sizeof(e.value));
             } else if (len == 4 && strncmp(data + start, "true", 4) == 0) {
-                entry.m_type = ValueType::Bool;
-                entry.m_boolVal = true;
-                strncpy(entry.m_value, "true", sizeof(entry.m_value));
+                e.type = value_type::bool_val;
+                e.bool_val = true;
+                strncpy(e.value, "true", sizeof(e.value));
             } else if (len == 5 && strncmp(data + start, "false", 5) == 0) {
-                entry.m_type = ValueType::Bool;
-                entry.m_boolVal = false;
-                strncpy(entry.m_value, "false", sizeof(entry.m_value));
+                e.type = value_type::bool_val;
+                e.bool_val = false;
+                strncpy(e.value, "false", sizeof(e.value));
             } else {
-                entry.m_type = ValueType::Integer;
-                entry.m_intVal = parseInteger(data + start, len);
-                size_t copy_len = len < sizeof(entry.m_value) - 1 ? len : sizeof(entry.m_value) - 1;
-                strncpy(entry.m_value, data + start, copy_len);
-                entry.m_value[copy_len] = '\0';
+                e.type = value_type::int_val;
+                e.int_val = parse_integer(data + start, len);
+                size_t copy_len = len < sizeof(e.value) - 1 ? len : sizeof(e.value) - 1;
+                strncpy(e.value, data + start, copy_len);
+                e.value[copy_len] = '\0';
             }
         }
 
-        static void unescapeString(const char* src, size_t srcLen, char* dst, size_t dstSize)
+        static void unescape_string(const char* src, size_t src_len, char* dst, size_t dst_size)
         {
             size_t di = 0;
-            for (size_t si = 0; si < srcLen && di < dstSize - 1; si++) {
-                if (src[si] == '\\' && si + 1 < srcLen) {
+            for (size_t si = 0; si < src_len && di < dst_size - 1; si++) {
+                if (src[si] == '\\' && si + 1 < src_len) {
                     si++;
                     switch (src[si]) {
                     case 'n':
@@ -221,7 +221,7 @@ namespace KtKernel
                         break;
                     default:
                         dst[di++] = '\\';
-                        if (di < dstSize - 1)
+                        if (di < dst_size - 1)
                             dst[di++] = src[si];
                         break;
                     }
@@ -232,7 +232,7 @@ namespace KtKernel
             dst[di] = '\0';
         }
 
-        static int64_t parseInteger(const char* str, size_t len)
+        static int64_t parse_integer(const char* str, size_t len)
         {
             if (len == 0)
                 return 0;
@@ -275,4 +275,4 @@ namespace KtKernel
         }
     };
 
-} // namespace KtKernel
+} // namespace kt_kernel

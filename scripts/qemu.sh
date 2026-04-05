@@ -1,7 +1,7 @@
 qemu-system-x86_64 \
   -m 4096 \
   -machine q35 \
-  -bios ./OVMF.fd \
+  -bios ./misc/OVMF.fd \
   -cdrom ./ktOS.iso \
   -boot d \
   -no-reboot \

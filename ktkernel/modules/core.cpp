@@ -4,42 +4,43 @@
 #include "utilities/configparser.h"
 #include "utilities/tar.h"
 
-namespace KtKernel
+namespace kt_kernel
 {
-    bool LoadCoreModules()
+    bool load_core_modules()
     {
-        KtCore::KPrint("Loading core modules.");
-        auto* system_tar = Limine::moduleRequest.response->modules[0];
-        TarArchive systems_archive;
+        print("Loading core modules.");
+
+        auto* system_tar = limine::module_request.response->modules[0];
+        tar_archive systems_archive;
         systems_archive.open(system_tar->address, system_tar->size);
 
-        auto file = systems_archive.readFile("config.toml");
+        auto file = systems_archive.read_file("config.toml");
         if (!file)
-            KtCore::Panic("Failed to read config.toml from system archive.");
+            panic("Failed to read config.toml from system archive.");
 
-        TomlParser config;
-        if (!config.parse(reinterpret_cast<const char*>(file.m_data), file.m_size))
-            KtCore::Panic("Failed to parse config.toml.");
+        toml_parser config;
+        if (!config.parse(reinterpret_cast<const char*>(file.data), file.size))
+            panic("Failed to parse config.toml.");
 
-        for (size_t i = 0; i < config.entryCount(); i++) {
-            const auto& entry = config.entry(i);
-            if (strcmp(entry.m_section, "modules") != 0)
+        for (size_t i = 0; i < config.entry_count(); i++) {
+            const auto& e = config.get_entry(i);
+            if (strcmp(e.section, "modules") != 0)
                 continue;
 
-            if (entry.m_type != TomlParser::ValueType::Bool || !entry.m_boolVal)
+            if (e.type != toml_parser::value_type::bool_val || !e.bool_val)
                 continue;
 
             char path[128] = "modules/";
-            strcat(path, entry.m_key);
+            strcat(path, e.key);
             strcat(path, ".ktdrv");
 
-            KtCore::KPrint("Loading module '{}'...", entry.m_key);
-            if (!LoadModule(path))
-                KtCore::Panic("Failed to load module '{}'.", entry.m_key);
+            print("Loading module '{}'...", e.key);
+            if (!load_module(path))
+                panic("Failed to load module '{}'.", e.key);
 
-            KtCore::KPrint("Module '{}' loaded successfully.", entry.m_key);
+            print("Module '{}' loaded successfully.", e.key);
         }
 
         return true;
     }
-} // namespace KtKernel
+} // namespace kt_kernel

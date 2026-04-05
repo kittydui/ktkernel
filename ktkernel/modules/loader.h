@@ -1,10 +1,10 @@
 #pragma once
 #include <kt/module.h>
 
-namespace KtKernel
+namespace kt_kernel
 {
-    bool LoadModule(const char* modulePath);
-    KtModule* GetModule(const char* moduleName);
+    bool load_module(const char* module_path);
+    kt_module* get_module(const char* module_name);
 
-    bool LoadCoreModules();
-} // namespace KtKernel
+    bool load_core_modules();
+} // namespace kt_kernel

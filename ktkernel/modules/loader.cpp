@@ -1,78 +1,82 @@
 #include "modules/loader.h"
 #include "limine/requests.h"
+#include "mem/string.h"
 #include "subsystems/console/logging.h"
+#include "subsystems/vmm/vmm.h"
 #include "symbol.h"
 #include "systems.h"
 #include "utilities/tar.h"
 #include <kt/elf.h>
 #include <kt/intrin.h>
 
-extern "C" const KernelSymbol __ktsymbol_start[];
-extern "C" const KernelSymbol __ktsymbol_end[];
+extern "C" const kernel_symbol __ktsymbol_start[];
+extern "C" const kernel_symbol __ktsymbol_end[];
 
-static uint64_t ResolveKernelSymbol(const char* name)
+static uint64_t resolve_kernel_symbol(const char* name)
 {
-    for (const KernelSymbol* sym = __ktsymbol_start; sym < __ktsymbol_end; sym++)
-        if (!strcmp(sym->m_name, name))
-            return reinterpret_cast<uint64_t>(sym->m_address);
+    for (const kernel_symbol* sym = __ktsymbol_start; sym < __ktsymbol_end; sym++)
+        if (!strcmp(sym->name, name))
+            return reinterpret_cast<uint64_t>(sym->address);
 
     return 0;
 }
 
-struct KtDrv
+struct kt_drv
 {
-    KtModuleEntry m_entryPoint;
-    const char* m_moduleName;
+    kt_module_entry entry_point;
+    const char* module_name;
 };
 
-struct LoadedModule
+struct loaded_module
 {
-    const char* m_moduleName;
-    KtModule m_module;
-    bool m_active;
-    KtDrv* m_ktdrv;
+    const char* module_name;
+    kt_module mod;
+    bool active;
+    kt_drv* ktdrv;
 };
 
-static constexpr uint64_t PAGE_SIZE = 0x1000;
+static constexpr uint64_t page_sz = 0x1000;
 
 extern "C" char kernel_end[];
 
-static uint64_t s_moduleAllocNext = 0;
-static uint64_t s_moduleAllocPageEnd = 0;
+static uint64_t s_module_alloc_next = 0;
+static uint64_t s_module_alloc_page_end = 0;
 
-static void* ModuleAlloc(size_t size)
+static void* module_alloc(size_t size)
 {
     if (size == 0)
         return nullptr;
 
-    if (s_moduleAllocNext == 0) {
-        s_moduleAllocNext = (reinterpret_cast<uint64_t>(kernel_end) + PAGE_SIZE - 1) & ~(PAGE_SIZE - 1);
-        s_moduleAllocPageEnd = s_moduleAllocNext;
+    if (s_module_alloc_next == 0) {
+        s_module_alloc_next = (reinterpret_cast<uint64_t>(kernel_end) + page_sz - 1) & ~(page_sz - 1);
+        s_module_alloc_page_end = s_module_alloc_next;
     }
 
-    s_moduleAllocNext = (s_moduleAllocNext + 15) & ~15ULL;
+    s_module_alloc_next = (s_module_alloc_next + 15) & ~15ULL;
 
-    uint64_t result = s_moduleAllocNext;
-    s_moduleAllocNext += size;
+    uint64_t result = s_module_alloc_next;
+    s_module_alloc_next += size;
 
-    while (s_moduleAllocPageEnd < s_moduleAllocNext) {
-        uint64_t frame = KtCore::g_kernelContext->m_pmm->allocateFrame();
+    while (s_module_alloc_page_end < s_module_alloc_next) {
+        uint64_t frame = kt_kernel::g_kernel_context->pmm->allocate_frame();
         if (!frame)
             return nullptr;
-        if (!KtCore::g_kernelContext->m_vmm->map(
-                s_moduleAllocPageEnd, frame, KtCore::PageFlags::PRESENT | KtCore::PageFlags::WRITABLE))
+        if (!kt_kernel::g_kernel_context->vmm->map(
+                s_module_alloc_page_end,
+                frame,
+                static_cast<uint64_t>(kt_kernel::page_flags::present | kt_kernel::page_flags::writable)))
             return nullptr;
-        s_moduleAllocPageEnd += PAGE_SIZE;
+        s_module_alloc_page_end += page_sz;
     }
 
     return reinterpret_cast<void*>(result);
 }
 
-namespace KtKernel
+namespace kt_kernel
 {
-    static KtCore::Vector<LoadedModule*> loadedModules = {};
+    static vector<loaded_module*> loaded_modules = {};
 
-    bool VerifyELF(const Elf64_Ehdr* e_hdr)
+    static bool verify_elf(const Elf64_Ehdr* e_hdr)
     {
         if (e_hdr->e_ident[0] != 0x7F || e_hdr->e_ident[1] != 'E' || e_hdr->e_ident[2] != 'L' ||
             e_hdr->e_ident[3] != 'F')
@@ -87,12 +91,13 @@ namespace KtKernel
         return true;
     }
 
-    bool AllocateSections(const uint8_t* base, const Elf64_Ehdr* e_hdr, uint64_t** section_addrs, uint16_t* section_num)
+    static bool
+    allocate_sections(const uint8_t* base, const Elf64_Ehdr* e_hdr, uint64_t** section_addrs, uint16_t* section_num)
     {
         const auto* section_headers = reinterpret_cast<const Elf64_Shdr*>(base + e_hdr->e_shoff);
         *section_num = e_hdr->e_shnum;
 
-        *section_addrs = static_cast<uint64_t*>(KtCore::KMalloc(*section_num * sizeof(uint64_t)));
+        *section_addrs = static_cast<uint64_t*>(kmalloc(*section_num * sizeof(uint64_t)));
         memset(*section_addrs, 0, *section_num * sizeof(uint64_t));
 
         for (uint16_t i = 0; i < *section_num; i++) {
@@ -103,10 +108,10 @@ namespace KtKernel
             if (shdr.sh_size == 0)
                 continue;
 
-            void* mem = ModuleAlloc(shdr.sh_size);
+            void* mem = module_alloc(shdr.sh_size);
             if (!mem) {
-                KtCore::KPrint("Couldn't allocate module!");
-                KtCore::KFree(*section_addrs);
+                print("Couldn't allocate module!");
+                kfree(*section_addrs);
                 return false;
             }
 
@@ -121,30 +126,30 @@ namespace KtKernel
         return true;
     }
 
-    bool LoadModule(const char* modulePath)
+    bool load_module(const char* module_path)
     {
-        auto* system_tar = Limine::moduleRequest.response->modules[0];
-        TarArchive systems_archive;
+        auto* system_tar = limine::module_request.response->modules[0];
+        tar_archive systems_archive;
         systems_archive.open(system_tar->address, system_tar->size);
 
-        auto file = systems_archive.readFile(modulePath);
+        auto file = systems_archive.read_file(module_path);
         if (!file) {
-            KtCore::KPrint("Cannot find file to load.");
+            print("Cannot find file to load.");
             return false;
         }
 
-        const uint8_t* base = file.m_data;
+        const uint8_t* base = file.data;
         const auto* e_hdr = reinterpret_cast<const Elf64_Ehdr*>(base);
 
-        if (!VerifyELF(e_hdr)) {
-            KtCore::KPrint("Unable to verify elf header.");
+        if (!verify_elf(e_hdr)) {
+            print("Unable to verify elf header.");
             return false;
         }
 
         uint64_t* section_addrs = nullptr;
         uint16_t section_num = 0;
-        if (!AllocateSections(base, e_hdr, &section_addrs, &section_num)) {
-            KtCore::KPrint("Unable to allocate sections.");
+        if (!allocate_sections(base, e_hdr, &section_addrs, &section_num)) {
+            print("Unable to allocate sections.");
             return false;
         }
 
@@ -161,13 +166,13 @@ namespace KtKernel
         }
 
         if (!symtab) {
-            KtCore::KFree(section_addrs);
+            kfree(section_addrs);
             return false;
         }
 
         const auto* syms = reinterpret_cast<const Elf64_Sym*>(base + symtab->sh_offset);
         size_t sym_count = symtab->sh_size / sizeof(Elf64_Sym);
-        auto* sym_addrs = static_cast<uint64_t*>(KtCore::KMalloc(sym_count * sizeof(uint64_t)));
+        auto* sym_addrs = static_cast<uint64_t*>(kmalloc(sym_count * sizeof(uint64_t)));
         memset(sym_addrs, 0, sym_count * sizeof(uint64_t));
 
         for (size_t i = 1; i < sym_count; i++) {
@@ -175,11 +180,11 @@ namespace KtKernel
 
             if (sym.st_shndx == SHN_UNDEF) {
                 const char* name = strtab + sym.st_name;
-                sym_addrs[i] = ResolveKernelSymbol(name);
+                sym_addrs[i] = resolve_kernel_symbol(name);
                 if (!sym_addrs[i]) {
-                    KtCore::KPrint("Unresolved symbol '{}'.", name);
-                    KtCore::KFree(sym_addrs);
-                    KtCore::KFree(section_addrs);
+                    print("Unresolved symbol '{}'.", name);
+                    kfree(sym_addrs);
+                    kfree(section_addrs);
                     return false;
                 }
             } else if (sym.st_shndx == SHN_ABS) {
@@ -215,8 +220,8 @@ namespace KtKernel
                 case R_X86_64_PLT32: {
                     int64_t value = static_cast<int64_t>(S + A) - static_cast<int64_t>(P);
                     if (value > 0x7FFFFFFFLL || value < -0x80000000LL) {
-                        KtCore::KFree(sym_addrs);
-                        KtCore::KFree(section_addrs);
+                        kfree(sym_addrs);
+                        kfree(section_addrs);
                         return false;
                     }
                     *reinterpret_cast<int32_t*>(P) = static_cast<int32_t>(value);
@@ -230,58 +235,58 @@ namespace KtKernel
                     *reinterpret_cast<int32_t*>(P) = static_cast<int32_t>(S + A);
                     break;
                 default:
-                    KtCore::KPrint("Unknown reloc type {}.", type);
-                    KtCore::KFree(sym_addrs);
-                    KtCore::KFree(section_addrs);
+                    print("Unknown reloc type {}.", type);
+                    kfree(sym_addrs);
+                    kfree(section_addrs);
                     return false;
                 }
             }
         }
 
-        KtCore::KFree(sym_addrs);
+        kfree(sym_addrs);
         const char* shstrtab = reinterpret_cast<const char*>(base + section_headers[e_hdr->e_shstrndx].sh_offset);
 
-        KtDrv* ktdrv_section = nullptr;
+        kt_drv* ktdrv_section = nullptr;
 
         for (uint16_t i = 0; i < section_num; i++) {
             if (!strcmp(shstrtab + section_headers[i].sh_name, ".ktdrv") && section_addrs[i] != 0) {
-                ktdrv_section = reinterpret_cast<KtDrv*>(section_addrs[i]);
+                ktdrv_section = reinterpret_cast<kt_drv*>(section_addrs[i]);
                 break;
             }
         }
 
         if (ktdrv_section == nullptr) {
-            KtCore::KPrint(".ktdrv section not found.");
-            KtCore::KFree(section_addrs);
+            print(".ktdrv section not found.");
+            kfree(section_addrs);
             return false;
         }
 
-        auto* loaded_module = static_cast<LoadedModule*>(KtCore::KMalloc(sizeof(LoadedModule)));
-        loaded_module->m_moduleName = ktdrv_section->m_moduleName;
-        loaded_module->m_ktdrv = ktdrv_section;
+        auto* loaded = static_cast<loaded_module*>(kmalloc(sizeof(loaded_module)));
+        loaded->module_name = ktdrv_section->module_name;
+        loaded->ktdrv = ktdrv_section;
 
-        KtStatus status = ktdrv_section->m_entryPoint(&loaded_module->m_module);
-        if (status != KtStatus::SUCCESS) {
-            KtCore::KPrint("Module entrypoint exited with status '{}'.", status);
-            KtCore::KFree(loaded_module);
-            KtCore::KFree(section_addrs);
+        kt_status status = ktdrv_section->entry_point(&loaded->mod);
+        if (status != kt_status::success) {
+            print("Module entrypoint exited with status '{}'.", static_cast<uint32_t>(status));
+            kfree(loaded);
+            kfree(section_addrs);
             return false;
         }
 
-        loaded_module->m_active = true;
-        loadedModules.pushBack(loaded_module);
-        KtCore::KFree(section_addrs);
+        loaded->active = true;
+        loaded_modules.push_back(loaded);
+        kfree(section_addrs);
         return true;
     }
 
-    KtModule* GetModule(const char* moduleName)
+    kt_module* get_module(const char* module_name)
     {
-        for (int i = 0; i < loadedModules.size(); i++) {
-            auto& mod = loadedModules[i];
-            if (!strcmp(mod->m_moduleName, moduleName))
-                return &mod->m_module;
+        for (size_t i = 0; i < loaded_modules.size(); i++) {
+            auto* mod = loaded_modules[i];
+            if (!strcmp(mod->module_name, module_name))
+                return &mod->mod;
         }
 
         return nullptr;
     }
-} // namespace KtKernel
+} // namespace kt_kernel

@@ -1,15 +1,15 @@
-#include "interrupts.h"
+#include "interrupts/handlers.h"
 #include "subsystems/console/logging.h"
 
-namespace KtKernel
+namespace kt_kernel
 {
-    void Int3Handler(uint8_t interruptIndex, uint64_t errorCode)
+    void int3_handler(uint8_t interrupt_index, uint64_t)
     {
-        KtCore::KPrint("bp hit (interrupt {})", interruptIndex);
+        print("bp hit (interrupt {})", interrupt_index);
     }
 
-    void GPHandler(uint8_t interruptIndex, uint64_t errorCode)
+    void gp_handler(uint8_t, uint64_t)
     {
-        KtCore::KPrint("General Protection Fault");
+        print("General Protection Fault");
     }
-} // namespace KtKernel
+} // namespace kt_kernel

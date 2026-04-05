@@ -7,14 +7,14 @@ cp -v build/ktkernel root/boot/
 mkdir -p root/system/modules
 mkdir -p root/system/fonts
 
-cp -v config.toml root/system/
+cp -v misc/config.toml root/system/
 cp -v fonts/Lat2-Terminus16.psfu root/system/fonts/
 cp -v build/modules/cmos.ktdrv root/system/modules/
 
 tar -cvf root/boot/system.tar -C root/system .
 
 mkdir -p root/boot/limine
-cp -v limine.conf limine/limine-bios.sys limine/limine-bios-cd.bin limine/limine-uefi-cd.bin root/boot/limine/
+cp -v misc/limine.conf limine/limine-bios.sys limine/limine-bios-cd.bin limine/limine-uefi-cd.bin root/boot/limine/
 
 mkdir -p root/EFI/BOOT
 cp -v limine/BOOTX64.EFI root/EFI/BOOT/

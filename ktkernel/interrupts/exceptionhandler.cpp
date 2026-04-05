@@ -1,12 +1,10 @@
-#include "interrupts/interrupts.h"
+#include "interrupts/handlers.h"
 #include "subsystems/console/logging.h"
 
-namespace KtKernel
+namespace kt_kernel
 {
-    [[noreturn]] void ExceptionHandler()
+    [[noreturn]] void exception_handler()
     {
-        KtCore::Panic("Exception Handler called!");
-
-        asm volatile("cli; hlt");
+        panic("Exception Handler called!");
     }
-} // namespace KtKernel
+} // namespace kt_kernel

@@ -1,53 +1,58 @@
 #include "interrupts/interrupts.h"
+#include "interrupts/handlers.h"
 #include "utilities/gdt.h"
 
-extern void* isrStubTable[];
+extern void* isr_stub_table[];
 
-namespace KtKernel
+namespace kt_kernel
 {
-    bool SetupIdt()
+    bool setup_idt()
     {
-        IDTR idtr = {};
-        idtr.m_base = (uintptr_t)&IDT[0];
-        idtr.m_limit = (uint16_t)sizeof(IDTEntry) * IDT_MAX_DESCRIPTORS - 1;
+        idt_ptr idtr = {};
+        idtr.base = (uintptr_t)&idt[0];
+        idtr.limit = (uint16_t)sizeof(idt_entry) * idt_max_descriptors - 1;
 
-        RegisterInterruptHandler(3, CreateAttributes(DPLRing::Ring0, GateType::TrapGate), Int3Handler);
-        RegisterInterruptHandler(13, CreateAttributes(DPLRing::Ring0, GateType::TrapGate), GPHandler);
+        register_interrupt_handler(static_cast<uint8_t>(interrupt_vector::bp),
+                                   create_attributes(static_cast<uint8_t>(dpl_ring::ring0), gate_type::trap_gate),
+                                   int3_handler);
+        register_interrupt_handler(static_cast<uint8_t>(interrupt_vector::gp),
+                                   create_attributes(static_cast<uint8_t>(dpl_ring::ring0), gate_type::trap_gate),
+                                   gp_handler);
 
-        loadIdt(idtr);
+        load_idt(idtr);
         return true;
     }
 
-    void IdtSetGateDescriptor(uint8_t index, void* isr, uint8_t flags)
+    void idt_set_gate_descriptor(uint8_t index, void* isr, uint8_t flags)
     {
-        IDTEntry* descriptor = &IDT[index];
-        descriptor->m_isrLow = (uint64_t)isr & 0xFFFF;
-        descriptor->m_kernelCs = KERNEL_CODE_SELECTOR;
-        descriptor->m_ist = 0;
-        descriptor->m_attributes = flags;
-        descriptor->m_isrMid = ((uint64_t)isr >> 16) & 0xFFFF;
-        descriptor->m_isrHigh = ((uint64_t)isr >> 32) & 0xFFFFFFFF;
-        descriptor->m_reserved = 0;
+        idt_entry* descriptor = &idt[index];
+        descriptor->isr_low = (uint64_t)isr & 0xFFFF;
+        descriptor->kernel_cs = kernel_code_selector;
+        descriptor->ist = 0;
+        descriptor->attributes = flags;
+        descriptor->isr_mid = ((uint64_t)isr >> 16) & 0xFFFF;
+        descriptor->isr_high = ((uint64_t)isr >> 32) & 0xFFFFFFFF;
+        descriptor->reserved = 0;
     }
 
-    extern "C" void InterruptDispatch(uint8_t interruptNumber, uint64_t errorCode)
+    extern "C" void interrupt_dispatch(uint8_t interrupt_number, uint64_t error_code)
     {
-        if (interruptHandlers[interruptNumber])
-            interruptHandlers[interruptNumber](interruptNumber, errorCode);
+        if (interrupt_handlers[interrupt_number])
+            interrupt_handlers[interrupt_number](interrupt_number, error_code);
         else
-            ExceptionHandler();
+            exception_handler();
     }
 
-    uint8_t CreateAttributes(uint8_t dpl, GateType gateType, bool p)
+    uint8_t create_attributes(uint8_t dpl, gate_type gate, bool p)
     {
-        return ((uint8_t)p << 7) | ((dpl & 0x3) << 5) | (gateType & 0xF);
+        return ((uint8_t)p << 7) | ((dpl & 0x3) << 5) | (static_cast<uint8_t>(gate) & 0xF);
     }
 
-    void RegisterInterruptHandler(uint8_t interruptNumber, uint8_t attributes, InterruptHandler_t handler)
+    void register_interrupt_handler(uint8_t interrupt_number, uint8_t attributes, interrupt_handler_fn handler)
     {
-        IdtSetGateDescriptor(interruptNumber, isrStubTable[interruptNumber], attributes);
+        idt_set_gate_descriptor(interrupt_number, isr_stub_table[interrupt_number], attributes);
 
-        if (!interruptHandlers[interruptNumber])
-            interruptHandlers[interruptNumber] = handler;
+        if (!interrupt_handlers[interrupt_number])
+            interrupt_handlers[interrupt_number] = handler;
     }
-} // namespace KtKernel
+} // namespace kt_kernel

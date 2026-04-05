@@ -3,9 +3,9 @@
 
 extern "C"
 {
-    void* KMalloc(size_t size);
-    void KFree(void* ptr);
-    void Log(const char* str);
-    void LogPrefix(const char* prefix, const char* str);
-    void LogFmt(const char* fmt, ...);
+    void* kmalloc(size_t size);
+    void kfree(void* ptr);
+    void log(const char* str);
+    void log_prefix(const char* prefix, const char* str);
+    void log_fmt(const char* fmt, ...);
 }

@@ -1,37 +1,32 @@
 #pragma once
 #include <kt/intrin.h>
 
-namespace KtKernel
+namespace kt_kernel
 {
-    constexpr auto IDT_MAX_DESCRIPTORS = 256;
-    __attribute__((aligned(0x10))) inline IDTEntry IDT[IDT_MAX_DESCRIPTORS] = {};
+    constexpr auto idt_max_descriptors = 256;
+    __attribute__((aligned(0x10))) inline idt_entry idt[idt_max_descriptors] = {};
 
-    using InterruptHandler_t = void (*)(uint8_t interruptIndex, uint64_t errorCode);
-    inline InterruptHandler_t interruptHandlers[IDT_MAX_DESCRIPTORS] = {};
+    using interrupt_handler_fn = void (*)(uint8_t interrupt_index, uint64_t error_code);
+    inline interrupt_handler_fn interrupt_handlers[idt_max_descriptors] = {};
 
-    enum GateType : uint8_t
+    enum class gate_type : uint8_t
     {
-        InterruptGate = 0xE,
-        TrapGate = 0xF
+        interrupt_gate = 0xE,
+        trap_gate = 0xF
     };
 
-    enum DPLRing : uint8_t
+    enum class dpl_ring : uint8_t
     {
-        Ring0 = 0,
-        Ring1 = 1,
-        Ring2 = 2,
-        Ring3 = 3,
+        ring0 = 0,
+        ring1 = 1,
+        ring2 = 2,
+        ring3 = 3,
     };
 
-    uint8_t CreateAttributes(uint8_t dpl, GateType gateType, bool p = true);
+    uint8_t create_attributes(uint8_t dpl, gate_type gate, bool p = true);
 
-    bool SetupIdt();
-    void IdtSetGateDescriptor(uint8_t index, void* isr, uint8_t flags);
+    bool setup_idt();
+    void idt_set_gate_descriptor(uint8_t index, void* isr, uint8_t flags);
 
-    void RegisterInterruptHandler(uint8_t interruptNumber, uint8_t attributes, InterruptHandler_t handler);
-
-    void Int3Handler(uint8_t interruptIndex, uint64_t errorCode);
-    void GPHandler(uint8_t interruptIndex, uint64_t errorCode);
-
-    [[noreturn]] void ExceptionHandler();
-} // namespace KtKernel
+    void register_interrupt_handler(uint8_t interrupt_number, uint8_t attributes, interrupt_handler_fn handler);
+} // namespace kt_kernel
