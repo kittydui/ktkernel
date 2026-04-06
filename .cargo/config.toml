@@ -9,6 +9,14 @@ rustflags = [
   "-C",
   "codegen-units=1",
 ]
+runner = "./scripts/root.sh"
 
 [unstable]
-build-std = ["core"]
+build-std = ["core", "alloc"]
+json-target-spec = true
+
+[build]
+target = "x86_64-unknown-none"
+
+[alias]
+build-modules = "build -p cmos --target misc/ktmodule.json"
