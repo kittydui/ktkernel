@@ -1,0 +1,12 @@
+[package]
+name = "cmos"
+version = "0.1.0"
+edition = "2024"
+
+[lib]
+crate-type = ["cdylib"]
+test = false
+
+[dependencies]
+ktmodule-api = { path = "../../ktmodule-api" }
+ktmacros = { path = "../../ktmacros" }

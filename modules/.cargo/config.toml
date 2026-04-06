@@ -1,0 +1,5 @@
+[build]
+target = "../misc/ktmodule.json"
+
+[unstable]
+build-std = ["core", "alloc"]

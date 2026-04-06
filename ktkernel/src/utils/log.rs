@@ -12,6 +12,6 @@ pub fn _log(args: fmt::Arguments) {
 #[macro_export]
 macro_rules! log {
     ($($arg:tt)*) => {
-        $crate::utils::log::_log(format_args!("{}\n", format_args!($($arg)*)))
+        $crate::utils::log::_log(format_args!("{}\r\n", format_args!($($arg)*)))
     };
 }
