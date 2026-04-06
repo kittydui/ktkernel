@@ -1,3 +1,6 @@
+#!/usr/bin/env bash
+
+
 mkdir -p root/boot/
 mkdir -p root/system/modules
 mkdir -p root/system/fonts
@@ -24,8 +27,12 @@ xorriso -as mkisofs -R -r -J -b boot/limine/limine-bios-cd.bin \
 
 ./limine/limine bios-install ktOS.iso
 
+sleep 0.5
+
+clear
+
 qemu-system-x86_64 \
-  -m 4096 \
+  -m 2048 \
   -machine q35 \
   -bios ./misc/OVMF.fd \
   -cdrom ./ktOS.iso \

@@ -21,3 +21,26 @@ pub fn inb(port: u16) -> u8 {
     }
     ret
 }
+
+#[inline(always)]
+pub fn read_cr3() -> u64 {
+    let val: u64;
+    unsafe {
+        asm!("mov {}, cr3", out(reg) val, options(nomem, nostack, preserves_flags));
+    }
+    val
+}
+
+#[inline(always)]
+pub fn write_cr3(val: u64) {
+    unsafe {
+        asm!("mov cr3, {}", in(reg) val, options(nostack, preserves_flags));
+    }
+}
+
+#[inline(always)]
+pub fn invlpg(addr: u64) {
+    unsafe {
+        asm!("invlpg [{}]", in(reg) addr, options(nostack, preserves_flags));
+    }
+}
